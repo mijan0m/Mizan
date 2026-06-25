@@ -16,7 +16,6 @@ function toBold(text) {
 
   return text.split("").map(c => map[c] || c).join("");
 }
-
 module.exports.config = {
   name: "ai",
   version: "2.0.1",
@@ -26,6 +25,11 @@ module.exports.config = {
   description: "Gemini AI Chat",
   commandCategory: "chat",
   category: "chat",
+
+  // ✅ FIXED PART
+  usePrefix: true,
+  prefix: true,
+
   usages: ".ai [question]"
 };
 
