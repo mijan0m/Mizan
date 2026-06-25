@@ -5,26 +5,29 @@ const GEMINI_API_KEY = "AQ.Ab8RN6Jaoa0N-ukC2Ih1EMiGBcySCRdhj_4F1GEgup5SMngzYg";
 module.exports.config = {
   name: "ai",
   version: "1.0.0",
-  hasPermssion: 0,
   credits: "Mijan",
+  cooldowns: 5,
+  hasPermssion: 0,
   description: "Gemini AI Chat",
-  commandCategory: "ai",
-  usages: ".ai [question]",
-  cooldowns: 5
+  commandCategory: "chat",
+  category: "chat",
+  usePrefix: true,
+  prefix: true,
+  usages: ".ai [question]"
 };
 
 module.exports.run = async function ({ api, event, args }) {
-  const prompt = args.join(" ");
-
-  if (!prompt) {
-    return api.sendMessage(
-      "Usage: .ai hello",
-      event.threadID,
-      event.messageID
-    );
-  }
-
   try {
+    const prompt = args.join(" ");
+
+    if (!prompt) {
+      return api.sendMessage(
+        "Example:\n.ai hello",
+        event.threadID,
+        event.messageID
+      );
+    }
+
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
@@ -54,7 +57,7 @@ module.exports.run = async function ({ api, event, args }) {
     console.log(error);
 
     return api.sendMessage(
-      "Gemini API Error!",
+      "Gemini API Error!\n" + error.message,
       event.threadID,
       event.messageID
     );
