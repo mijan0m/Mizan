@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const GEMINI_API_KEY = "AQ.Ab8RN6Jaoa0N-ukC2Ih1EMiGBcySCRdhj_4F1GEgup5SMngzYg";
+const GEMINI_API_KEY = "AQ.Ab8RN6J-3eeNjIdAWVtfCfvOy-d76IleAHmkwsAv2iORdFAE1g";
 
 module.exports.config = {
   name: "ai",
