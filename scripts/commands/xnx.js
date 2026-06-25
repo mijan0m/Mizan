@@ -1,40 +1,67 @@
 const axios = require("axios");
-const fs = require("fs-extra");
-const path = require("path");
-const jimp = require("jimp");
+
+const GEMINI_API_KEY = "AQ.Ab8RN6Jaoa0N-ukC2Ih1EMiGBcySCRdhj_4F1GEgup5SMngzYg";
 
 module.exports.config = {
-  name: "xnx",
-  version: "2.0.0",
-  permission: 0,
-  credits: "Joy Ahmed",
-  description: "Make a romantic love frame with someone you mention",
-  prefix: true,
-  category: "Love",
-  usages: "[tag]",
+  name: "ai",
+  version: "1.0.0",
+  hasPermssion: 0,
+  credits: "Mijan",
+  description: "Gemini AI Chat",
+  commandCategory: "ai",
+  usages: ".ai [question]",
   cooldowns: 5
 };
-module.exports.onLoad = async () => {
-  const { resolve } = global.nodemodule["path"];
-  const { existsSync, mkdirSync } = global.nodemodule["fs-extra"];
-  const { downloadFile } = global.utils;
-  const dirMaterial = resolve(__dirname, "cache", "canvas");
-  const pathImg = resolve(dirMaterial, "Xnx.png");
-  if (!existsSync(dirMaterial)) mkdirSync(dirMaterial, { recursive: true });
-  if (!existsSync(pathImg)) await downloadFile("https://drive.google.com/uc?id=1DPUFsT7-FMFx1tgmV8_zqAuZmTUHdmU8", pathImg);
-};
 
-async function circle(image) {
-  const jimp = global.nodemodule["jimp"];
-  image = await jimp.read(image);
-  image.circle();
-  return await image.getBufferAsync("image/png");
-}
+module.exports.run = async function ({ api, event, args }) {
 
-async function makeImage({ one, two }) {
-  const fs = global.nodemodule["fs-extra"];
-  const path = global.nodemodule["path"];
-  const axios = global.nodemodule["axios"];
+  const prompt = args.join(" ");
+
+  if (!prompt) {
+    return api.sendMessage(
+      "Usage: .ai hello",
+      event.threadID,
+      event.messageID
+    );
+  }
+
+  try {
+
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt
+              }
+            ]
+          }
+        ]
+      }
+    );
+
+    const reply =
+      response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response received.";
+
+    api.sendMessage(
+      reply,
+      event.threadID,
+      event.messageID
+    );
+
+  } catch (error) {
+    console.log(error);
+
+    api.sendMessage(
+      "Gemini API Error!",
+      event.threadID,
+      event.messageID
+    );
+  }
+};  const axios = global.nodemodule["axios"];
   const jimp = global.nodemodule["jimp"];
   const __root = path.resolve(__dirname, "cache", "canvas");
 
