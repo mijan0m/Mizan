@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const GEMINI_API_KEY = "AQ.Ab8RN6J-3eeNjIdAWVtfCfvOy-d76IleAHmkwsAv2iORdFAE1g";
+const GEMINI_API_KEY = "AQ.Ab8RN6LX6wtN2iSF2IV4vi_q3XxFJTCSyd7QmbuUqe9HknGacA";
 
 /* ✅ BOLD CONVERTER */
 function toBold(text) {
