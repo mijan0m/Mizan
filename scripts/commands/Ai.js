@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const GEMINI_API_KEY = "AQ.Ab8RN6J-3eeNjIdAWVtfCfvOy-d76IleAHmkwsAv2iORdFAE1g";
 
-/* ✅ FIXED BOLD CONVERTER (NO BROKEN TEXT ISSUE) */
+/* ✅ BOLD CONVERTER */
 function toBold(text) {
   const map = {
     A:"𝐀",B:"𝐁",C:"𝐂",D:"𝐃",E:"𝐄",F:"𝐅",G:"𝐆",H:"𝐇",I:"𝐈",J:"𝐉",
@@ -17,133 +17,56 @@ function toBold(text) {
   return text.split("").map(c => map[c] || c).join("");
 }
 
-/* ================= CONFIG ================= */
 module.exports.config = {
   name: "ai",
-  version: "2.0.0",
+  version: "2.0.1",
   credits: "Mijan",
   cooldowns: 5,
   hasPermssion: 0,
   description: "Gemini AI Chat",
   commandCategory: "chat",
   category: "chat",
-  usePrefix: true,
-  prefix: true,
   usages: ".ai [question]"
 };
 
-/* ================= GEMINI FUNCTION ================= */
+/* ================= GEMINI ================= */
 async function getAIResponse(prompt) {
-  const response = await axios.post(
+  const res = await axios.post(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
     {
-      contents: [
-        {
-          parts: [
-            {
-              text: `
-You are a friendly Messenger AI chatbot.
+      contents: [{
+        parts: [{
+          text: `
+You are a Messenger AI bot.
 
 Rules:
-- Reply in clear text
-- Use emojis 😊😂🔥❤️ naturally
-- Keep replies short and friendly
-- If asked about owner/creator/developer/maker, reply ONLY:
+- Use emojis 😊😂🔥❤️
+- Friendly tone
+- If asked about owner/creator/maker reply ONLY:
 👑 My owner is Mizan.
-              `
-            }
-          ]
-        }
-      ]
+
+User: ${prompt}
+          `
+        }]
+      }]
     }
   );
 
   let reply =
-    response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-    "No response received.";
+    res.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+    "No response.";
 
   return toBold(reply);
 }
 
-/* ================= HANDLE REPLY ================= */
-module.exports.handleReply = async function ({ api, event }) {
-  try {
-    const prompt = event.body;
-    const msg = prompt.toLowerCase();
-
-    /* OWNER CHECK */
-    if (
-      msg.includes("owner") ||
-      msg.includes("creator") ||
-      msg.includes("developer") ||
-      msg.includes("maker") ||
-      msg.includes("who made you") ||
-      msg.includes("who created you") ||
-      msg.includes("malik") ||
-      msg.includes("তোমার মালিক") ||
-      msg.includes("মালিক কে")
-    ) {
-      return api.sendMessage(
-        toBold("👑 My owner is Mizan."),
-        event.threadID,
-        event.messageID
-      );
-    }
-
-    const reply = await getAIResponse(prompt);
-
-    api.sendMessage(
-      reply,
-      event.threadID,
-      (err, info) => {
-        if (!err) {
-          global.client.handleReply.push({
-            name: module.exports.config.name,
-            messageID: info.messageID
-          });
-        }
-      },
-      event.messageID
-    );
-
-  } catch (error) {
-    api.sendMessage(
-      "❌ Gemini Error: " + error.message,
-      event.threadID,
-      event.messageID
-    );
-  }
-};
-
-/* ================= MAIN COMMAND ================= */
+/* ================= MAIN ================= */
 module.exports.run = async function ({ api, event, args }) {
   try {
     const prompt = args.join(" ");
 
     if (!prompt) {
       return api.sendMessage(
-        toBold("💬 Example:\n.ai Hello"),
-        event.threadID,
-        event.messageID
-      );
-    }
-
-    const msg = prompt.toLowerCase();
-
-    /* OWNER CHECK */
-    if (
-      msg.includes("owner") ||
-      msg.includes("creator") ||
-      msg.includes("developer") ||
-      msg.includes("maker") ||
-      msg.includes("who made you") ||
-      msg.includes("who created you") ||
-      msg.includes("malik") ||
-      msg.includes("তোমার মালিক") ||
-      msg.includes("মালিক কে")
-    ) {
-      return api.sendMessage(
-        toBold("👑 My owner is Mizan."),
+        toBold("💬 Example: .ai hello"),
         event.threadID,
         event.messageID
       );
@@ -155,7 +78,7 @@ module.exports.run = async function ({ api, event, args }) {
       reply,
       event.threadID,
       (err, info) => {
-        if (!err) {
+        if (!err && global.client?.handleReply) {
           global.client.handleReply.push({
             name: module.exports.config.name,
             messageID: info.messageID
@@ -165,127 +88,22 @@ module.exports.run = async function ({ api, event, args }) {
       event.messageID
     );
 
-  } catch (error) {
+  } catch (err) {
+    console.log(err);
     api.sendMessage(
-      "❌ Gemini Error: " + error.message,
-      event.threadID,
-      event.messageID
-    );
-  }
-};        {
-          parts: [
-            {
-              text: `
-You are a friendly Messenger AI chatbot.
-
-Rules:
-- Use emojis naturally 😊😂🔥❤️
-- Keep replies friendly and helpful
-- If someone asks who is your owner, creator, developer or maker, reply only:
-👑 My owner is Mizan.
-
-User: ${prompt}
-`
-            }
-          ]
-        }
-      ]
-    }
-  );
-
-  let reply =
-    response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-    "No response received.";
-
-  return toBold(reply);
-}
-
-module.exports.handleReply = async function ({
-  api,
-  event
-}) {
-  try {
-    const prompt = event.body;
-    const msg = prompt.toLowerCase();
-
-    if (
-      msg.includes("owner") ||
-      msg.includes("creator") ||
-      msg.includes("developer") ||
-      msg.includes("maker") ||
-      msg.includes("who made you") ||
-      msg.includes("who created you") ||
-      msg.includes("তোমার মালিক") ||
-      msg.includes("মালিক কে")
-    ) {
-      return api.sendMessage(
-        toBold("👑 My owner is Mizan."),
-        event.threadID,
-        event.messageID
-      );
-    }
-
-    const reply = await getAIResponse(prompt);
-
-    api.sendMessage(
-      reply,
-      event.threadID,
-      (err, info) => {
-        if (!err) {
-          global.client.handleReply.push({
-            name: module.exports.config.name,
-            messageID: info.messageID
-          });
-        }
-      },
-      event.messageID
-    );
-
-  } catch (error) {
-    console.log(error);
-
-    api.sendMessage(
-      "❌ Gemini API Error!\n" + error.message,
+      "❌ Error: " + err.message,
       event.threadID,
       event.messageID
     );
   }
 };
 
-module.exports.run = async function ({
-  api,
-  event,
-  args
-}) {
+/* ================= REPLY ================= */
+module.exports.handleReply = async function ({ api, event }) {
   try {
-    const prompt = args.join(" ");
+    const prompt = event.body;
 
-    if (!prompt) {
-      return api.sendMessage(
-        toBold("💬 Example:\n.ai Hello"),
-        event.threadID,
-        event.messageID
-      );
-    }
-
-    const msg = prompt.toLowerCase();
-
-    if (
-      msg.includes("owner") ||
-      msg.includes("creator") ||
-      msg.includes("developer") ||
-      msg.includes("maker") ||
-      msg.includes("who made you") ||
-      msg.includes("who created you") ||
-      msg.includes("তোমার মালিক") ||
-      msg.includes("মালিক কে")
-    ) {
-      return api.sendMessage(
-        toBold("👑 My owner is Mizan."),
-        event.threadID,
-        event.messageID
-      );
-    }
+    if (!prompt) return;
 
     const reply = await getAIResponse(prompt);
 
@@ -293,7 +111,7 @@ module.exports.run = async function ({
       reply,
       event.threadID,
       (err, info) => {
-        if (!err) {
+        if (!err && global.client?.handleReply) {
           global.client.handleReply.push({
             name: module.exports.config.name,
             messageID: info.messageID
@@ -303,11 +121,9 @@ module.exports.run = async function ({
       event.messageID
     );
 
-  } catch (error) {
-    console.log(error);
-
+  } catch (e) {
     api.sendMessage(
-      "❌ Gemini API Error!\n" + error.message,
+      "❌ Error: " + e.message,
       event.threadID,
       event.messageID
     );
